@@ -29,36 +29,74 @@ For this part of the assignment, you can ignore the missing values in the datase
 ```{r}
 df.steps.per.day <- aggregate(steps ~ date, data = df.activity, sum)
 hist(df.steps.per.day$steps)
-mean(df.steps.per.day$steps)
-median(df.steps.per.day$steps)
+mean.steps.per.day <- mean(df.steps.per.day$steps)
+median.steps.per.day <- median(df.steps.per.day$steps)
+mean.steps.per.day
+median.steps.per.day
 ```
 
 
 ## What is the average daily activity pattern?
 
-<!--
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+```{r}
+df.average.steps.per.interval <- aggregate(steps ~ interval, data = df.activity, mean)
+plot(df.average.steps.per.interval, type="l")
+```
+
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
--->
 
-
+```{r}
+df.average.steps.per.interval$interval[which.max(df.average.steps.per.interval$steps)]
+```
 
 
 ## Imputing missing values
 
-<!--
-Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
-1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
-2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
-3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
-4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
--->
+Calculate total number of rows with missing values in the dataset:
+
+```{r}
+sum(apply(df.activity, 1, function(row) any(is.na(row))))
+```
+
+Creating new dataset while imputing missing values by using linear interpolation of closest non-NA rows
+
+```{r}
+df.activity.imputed <- df.activity
+df.activity.imputed$steps <- approxfun(seq_along(df.activity$steps), df.activity$steps, method="linear", rule=2)(seq_along(df.activity$steps))
+if(any(is.na(df.activity.imputed))) {print("WARN: NA values in df.activity.imputed")}
+```
+
+Histogram of the total number of steps taken each day after imputation:
+
+```{r}
+df.steps.per.day.imputed <- aggregate(steps ~ date, data = df.activity.imputed, sum)
+hist(df.steps.per.day.imputed$steps)
+```
+
+Mean and median total number of steps taken per day after imputation:
+
+```{r}
+mean.steps.per.day.imputed <- mean(df.steps.per.day.imputed$steps)
+median.steps.per.day.imputed <- median(df.steps.per.day.imputed$steps)
+mean.steps.per.day.imputed
+median.steps.per.day.imputed
+```
+
+Recall the non-imputed versions of these statistics:
+
+```{r}
+mean.steps.per.day
+median.steps.per.day
+```
+
+We conclude that linear imputation of missing data changes the mean value of total steps per day by `r mean.steps.per.day.imputed-mean.steps.per.day` and the median by `r median.steps.per.day.imputed-median.steps.per.day`.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-<!--
-For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
+TODO: For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
--->
+
+
