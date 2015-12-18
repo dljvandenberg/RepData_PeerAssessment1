@@ -10,10 +10,12 @@ output:
 
 Set workdir, unzip data and read csv file to dataframe
 
-```{r setWorkDirAndUnzipDataAndReadCsv}
+```{r}
+suppressMessages(library(lubridate))
 setwd("~/git/RepData_PeerAssessment1")
 unzip("activity.zip")
 df.activity <- read.csv("activity.csv")
+df.activity$date <- ymd(df.activity$date)
 ```
 
 
@@ -83,20 +85,32 @@ mean.steps.per.day.imputed
 median.steps.per.day.imputed
 ```
 
-Recall the non-imputed versions of these statistics:
+Recall the non-imputed versions of these metrics:
 
 ```{r}
 mean.steps.per.day
 median.steps.per.day
 ```
 
-We conclude that linear imputation of missing data changes the mean value of total steps per day by `r mean.steps.per.day.imputed-mean.steps.per.day` and the median by `r median.steps.per.day.imputed-median.steps.per.day`.
+We conclude that linear imputation of missing data changes the mean value of total steps per day by `r round(mean.steps.per.day.imputed-mean.steps.per.day, 2)` and the median by `r median.steps.per.day.imputed-median.steps.per.day`.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-TODO: For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
-1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
-2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
+```{r}
+weekorweekend <- function(date) {
+    if (weekdays(date) %in% c("Saturday", "Sunday")) {"weekend"} else {"weekday"}
+}
+df.activity.imputed$weekorweekend <- as.factor(sapply(df.activity.imputed$date, weekorweekend))
+```
+
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+```{r}
+df.average.steps.per.interval.and.weekorweekday.imputed <- aggregate(steps ~ interval + weekorweekend, data = df.activity.imputed, mean)
+suppressMessages(library(ggplot2))
+ggplot(data = df.average.steps.per.interval.and.weekorweekday.imputed, aes(x=interval, y=steps)) + facet_grid(weekorweekend ~ .) + geom_line()
+```
 
