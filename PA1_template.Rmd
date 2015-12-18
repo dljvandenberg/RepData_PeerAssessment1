@@ -1,14 +1,24 @@
 ---
 title: "Reproducible Research: Activity Monitoring"
+subtitle: "Dennis van den Berg"
 output: 
   html_document:
     keep_md: true
 ---
 
 
+## Introduction
+
+It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the "quantified self" movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.
+
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
+
+Below we describe and show all steps taken to investigate the data set, including R code.
+
+
 ## Loading and preprocessing the data
 
-Set workdir, unzip data and read csv file to dataframe
+First we set our working directory, unzip the data, read the unzipped csv file to a dataframe and convert the date variable to a POSIXct/POSIXt date format.
 
 ```{r}
 suppressMessages(library(lubridate))
@@ -21,16 +31,16 @@ df.activity$date <- ymd(df.activity$date)
 
 ## What is mean total number of steps taken per day?
 
-<!--
-For this part of the assignment, you can ignore the missing values in the dataset.
-1. Calculate the total number of steps taken per day
-2. Make a histogram of the total number of steps taken each day
-3. Calculate and report the mean and median of the total number of steps taken per day
---> 
+We calculate the total number of steps taken per day and plot this in a histogram.
 
 ```{r}
 df.steps.per.day <- aggregate(steps ~ date, data = df.activity, sum)
 hist(df.steps.per.day$steps)
+```
+
+The mean and median of the total number of steps taken per day are calculated as follows.
+
+```{r}
 mean.steps.per.day <- mean(df.steps.per.day$steps)
 median.steps.per.day <- median(df.steps.per.day$steps)
 mean.steps.per.day
@@ -40,13 +50,14 @@ median.steps.per.day
 
 ## What is the average daily activity pattern?
 
-1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+Next, a time series plot is created of the 5-minute interval and the average number of steps taken, averaged across all days.
+
 ```{r}
 df.average.steps.per.interval <- aggregate(steps ~ interval, data = df.activity, mean)
 plot(df.average.steps.per.interval, type="l")
 ```
 
-2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+Determining which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps, we find:
 
 ```{r}
 df.average.steps.per.interval$interval[which.max(df.average.steps.per.interval$steps)]
@@ -55,13 +66,13 @@ df.average.steps.per.interval$interval[which.max(df.average.steps.per.interval$s
 
 ## Imputing missing values
 
-Calculate total number of rows with missing values in the dataset:
+Total number of rows with missing values in the dataset:
 
 ```{r}
 sum(apply(df.activity, 1, function(row) any(is.na(row))))
 ```
 
-Creating new dataset while imputing missing values by using linear interpolation of closest non-NA rows
+We now create a new dataset `df.activity.imputed` in which we imputed missing values by using a linear interpolation of closest non-NA rows:
 
 ```{r}
 df.activity.imputed <- df.activity
@@ -97,7 +108,7 @@ We conclude that linear imputation of missing data changes the mean value of tot
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+We create a new factor variable in the `df.activity.imputed` dataset with two levels – "weekday" and "weekend"" indicating whether a given date is a weekday or weekend day.
 
 ```{r}
 weekorweekend <- function(date) {
@@ -106,7 +117,7 @@ weekorweekend <- function(date) {
 df.activity.imputed$weekorweekend <- as.factor(sapply(df.activity.imputed$date, weekorweekend))
 ```
 
-Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+Finally, we make a panel plot containing a time series plot of the 5-minute interval and the average number of steps taken, averaged across all weekday days or weekend days.
 
 ```{r}
 df.average.steps.per.interval.and.weekorweekday.imputed <- aggregate(steps ~ interval + weekorweekend, data = df.activity.imputed, mean)
@@ -114,3 +125,14 @@ suppressMessages(library(ggplot2))
 ggplot(data = df.average.steps.per.interval.and.weekorweekday.imputed, aes(x=interval, y=steps)) + facet_grid(weekorweekend ~ .) + geom_line()
 ```
 
+We see some clear differences between weekday and weekend days.
+
+
+## Conclusion
+
+Using a few simple chunks of R code (all shown inline) we've been able to process a zipped data file with human activity data and gain insight into the following questions:
+
+* What is mean total number of steps taken per day?
+* What is the average daily activity pattern?
+* How to impute missing values?
+* Are there differences in activity patterns between weekdays and weekends?
