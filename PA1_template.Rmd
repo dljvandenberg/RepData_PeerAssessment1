@@ -35,7 +35,7 @@ We calculate the total number of steps taken per day and plot this in a histogra
 
 ```{r}
 df.steps.per.day <- aggregate(steps ~ date, data = df.activity, sum)
-hist(df.steps.per.day$steps)
+hist(df.steps.per.day$steps, xlab="Steps per day", main="Histogram of steps per day (raw data)")
 ```
 
 The mean and median of the total number of steps taken per day are calculated as follows.
@@ -54,7 +54,7 @@ Next, a time series plot is created of the 5-minute interval and the average num
 
 ```{r}
 df.average.steps.per.interval <- aggregate(steps ~ interval, data = df.activity, mean)
-plot(df.average.steps.per.interval, type="l")
+plot(df.average.steps.per.interval, type="l", main="Average number of steps on specific time of date")
 ```
 
 Determining which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps, we find:
@@ -84,7 +84,7 @@ Histogram of the total number of steps taken each day after imputation:
 
 ```{r}
 df.steps.per.day.imputed <- aggregate(steps ~ date, data = df.activity.imputed, sum)
-hist(df.steps.per.day.imputed$steps)
+hist(df.steps.per.day.imputed$steps, xlab="Steps per day", , main="Histogram of steps per day (after imputation)")
 ```
 
 Mean and median total number of steps taken per day after imputation:
@@ -106,7 +106,7 @@ median.steps.per.day
 We conclude that linear imputation of missing data changes the mean value of total steps per day by `r round(mean.steps.per.day.imputed-mean.steps.per.day, 2)` and the median by `r median.steps.per.day.imputed-median.steps.per.day`.
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+## Activity patterns differences between weekdays and weekends
 
 We create a new factor variable in the `df.activity.imputed` dataset with two levels – "weekday" and "weekend"" indicating whether a given date is a weekday or weekend day.
 
@@ -122,7 +122,7 @@ Finally, we make a panel plot containing a time series plot of the 5-minute inte
 ```{r}
 df.average.steps.per.interval.and.weekorweekday.imputed <- aggregate(steps ~ interval + weekorweekend, data = df.activity.imputed, mean)
 suppressMessages(library(ggplot2))
-ggplot(data = df.average.steps.per.interval.and.weekorweekday.imputed, aes(x=interval, y=steps)) + facet_grid(weekorweekend ~ .) + geom_line()
+ggplot(data = df.average.steps.per.interval.and.weekorweekday.imputed, aes(x=interval, y=steps)) + facet_grid(weekorweekend ~ .) + geom_line() + ggtitle("Average activity pattern weekdays vs weekends")
 ```
 
 We see some clear differences between weekday and weekend days.
